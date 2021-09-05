@@ -1,6 +1,7 @@
 package mk.ukim.finki.emt.donationmanagement.domain.valueobjects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import mk.ukim.finki.emt.sharedkernel.domain.base.ValueObject;
 import mk.ukim.finki.emt.sharedkernel.domain.financial.Currency;
@@ -25,10 +26,10 @@ public class Donor implements ValueObject {
     }
 
     @JsonCreator
-    public Donor( DonorId id,
-                    String name,
-                  Money sum,
-                   int count) {
+    public Donor(@JsonProperty("id") DonorId id,
+                 @JsonProperty("donorName")  String name,
+                 @JsonProperty("sum")Money sum,
+                 @JsonProperty("count")int count) {
         this.id = id;
         this.name = name;
         this.sum = sum;

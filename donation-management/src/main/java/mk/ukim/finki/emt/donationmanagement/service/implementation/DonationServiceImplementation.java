@@ -10,6 +10,8 @@ import mk.ukim.finki.emt.donationmanagement.domain.repository.DonationRepository
 import mk.ukim.finki.emt.donationmanagement.service.DonationService;
 import mk.ukim.finki.emt.donationmanagement.service.forms.DonationForm;
 import mk.ukim.finki.emt.donationmanagement.service.forms.DonationItemForm;
+import mk.ukim.finki.emt.sharedkernel.domain.events.donations.DonationItemCreated;
+import mk.ukim.finki.emt.sharedkernel.infra.DomainEventPublisher;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -26,8 +28,11 @@ import javax.validation.ConstraintViolationException;
 @AllArgsConstructor
 public class DonationServiceImplementation implements DonationService {
 
-   private final DonationRepository donationRepository;
+    private final DonationRepository donationRepository;
+
     private final Validator validator;
+
+    private final DomainEventPublisher domainEventPublisher;
 
     @Override
     public DonationId makeADonation(DonationForm donationForm) {
@@ -36,10 +41,11 @@ public class DonationServiceImplementation implements DonationService {
         if(constraintViolations.size() > 0){
             throw new ConstraintViolationException("The donation form is not valid", constraintViolations);
         }
-
         var newDonation = donationRepository.saveAndFlush(toDomainObject(donationForm));
-        return newDonation.getId();
 
+        newDonation.getDonationItemSet().forEach(donationItem -> this.domainEventPublisher.publish(new DonationItemCreated(donationItem.getDonorId().getId(), donationItem.getQuantity())));
+
+        return newDonation.getId();
     }
 
     private Donation toDomainObject(DonationForm donationForm){
@@ -63,14 +69,14 @@ public class DonationServiceImplementation implements DonationService {
         Donation donation = this.donationRepository.findById(donationId).orElseThrow(DonationIdNotExistException::new);
         donation.addDonationItem(donationItemForm.getDonor(), donationItemForm.getQuantity());
 
-        donationRepository.saveAndFlush(donation);
+        this.domainEventPublisher.publish(new DonationItemCreated(donationItemForm.getDonor().getId().getId(), donationItemForm.getQuantity()));
     }
 
     @Override
     public void deleteItem(DonationId donationId, DonationItemId donationItemId) throws DonationIdNotExistException, DonationItemIdNotExistException {
-         Donation donation = this.donationRepository.findById(donationId).orElseThrow(DonationItemIdNotExistException::new);
-         donation.removeDonationItem(donationItemId);
+        Donation donation = this.donationRepository.findById(donationId).orElseThrow(DonationItemIdNotExistException::new);
+        donation.removeDonationItem(donationItemId);
 
-         donationRepository.saveAndFlush(donation);
+        donationRepository.saveAndFlush(donation);
     }
 }

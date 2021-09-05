@@ -25,7 +25,7 @@ public class DonationItem extends AbstractEntity<DonationItemId> {
     @AttributeOverride(name="id", column = @Column(name="donor_id", nullable = false))
     private DonorId donorId;
 
-    protected DonationItem() {
+    public DonationItem() {
         super(DomainObjectId.randomId(DonationItemId.class));
     }
 

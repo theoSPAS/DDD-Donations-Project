@@ -1,11 +1,13 @@
 package mk.ukim.finki.emt.donorcatalog.domain.models;
 
+import lombok.Getter;
 import mk.ukim.finki.emt.sharedkernel.domain.base.AbstractEntity;
 import mk.ukim.finki.emt.sharedkernel.domain.financial.Money;
 
 import javax.persistence.*;
 
 @Entity
+@Getter
 @Table(name="donor")
 public class Donor extends AbstractEntity<DonorId> {
 

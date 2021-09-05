@@ -7,5 +7,12 @@ import javax.persistence.Embeddable;
 @Embeddable
 public class DonorId extends DomainObjectId {
 
+    protected DonorId() {
+        super(DonorId.randomId(DonorId.class).getId());
+    }
+
+    public DonorId(String uuid) {
+        super(uuid);
+    }
 
 }
